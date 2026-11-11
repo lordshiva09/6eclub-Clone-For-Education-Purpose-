@@ -1,0 +1,18 @@
+<svg preserveAspectRatio="none" overflow="visible" width="83" height="83" viewBox="0 0 83 83" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Ellipse 597">
+<path d="M82.5 41.5C82.5 64.1437 64.1437 82.5 41.5 82.5C18.8563 82.5 0.5 64.1437 0.5 41.5C0.5 18.8563 18.8563 0.5 41.5 0.5C64.1437 0.5 82.5 18.8563 82.5 41.5Z" fill="url(#paint0_linear_0_62)"/>
+<path d="M82.75 41.5C82.75 64.2817 64.2817 82.75 41.5 82.75C18.7183 82.75 0.25 64.2817 0.25 41.5C0.25 18.7183 18.7183 0.25 41.5 0.25C64.2817 0.25 82.75 18.7183 82.75 41.5Z" stroke-width="0.5" stroke="url(#paint1_linear_0_62)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_62" x1="23.0158" y1="6.80324" x2="57.0027" y2="81.9321" gradientUnits="userSpaceOnUse">
+<stop stop-color="#CE5E3A"/>
+<stop offset="0.726331" stop-color="#F5A17C"/>
+<stop offset="1" stop-color="#F4895B"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_62" x1="17.0532" y1="8.59202" x2="71.3129" y2="73.5844" gradientUnits="userSpaceOnUse">
+<stop offset="0.02" stop-color="#F49E83"/>
+<stop offset="0.597635" stop-color="#FFBDA1" stop-opacity="0.21"/>
+<stop offset="1" stop-color="#FFE5D2"/>
+</linearGradient>
+</defs>
+</svg>

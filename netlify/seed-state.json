@@ -1,0 +1,320 @@
+{
+  "shared": {
+    "user": {
+      "phone": "8102318421",
+      "countryCode": "+91",
+      "password": "Pk9082pk",
+      "uid": "155885",
+      "nickname": "MemberNNG0DA0S",
+      "vipLevel": 0,
+      "balance": 77567,
+      "withdrawable": 0,
+      "inviteCode": "QZ54MEN",
+      "bankCard": {
+        "bankName": "JIO PAYMENTS BANK LIMITED",
+        "accountNo": "001521711947196",
+        "holder": "MemberNNG0DA0S",
+        "ifsc": "JIOP0000001"
+      }
+    },
+    "usersDb": [
+      {
+        "phone": "8102318421",
+        "password": "Pk9082pk",
+        "uid": "155885",
+        "nickname": "MemberNNG0DA0S"
+      }
+    ],
+    "wheelSpins": 2,
+    "wheelHistory": [
+      {
+        "time": "2026-11-11 08:12:40",
+        "tier": "Silver",
+        "prize": "₹6.00"
+      },
+      {
+        "time": "2026-11-10 21:04:11",
+        "tier": "Silver",
+        "prize": "₹6.00"
+      }
+    ],
+    "withdrawAccounts": [],
+    "selectedWdAccountId": "",
+    "withdrawalHistory": [
+      {
+        "id": "WD261110175528575kHmAdtEepK",
+        "time": "2026-11-10 23:25:28",
+        "cash": 11000,
+        "method": "USDT",
+        "status": "Processing",
+        "daysAgo": 1
+      },
+      {
+        "id": "WD261110172347162kNmAdtEepK",
+        "time": "2026-11-10 22:53:47",
+        "cash": 4000,
+        "method": "BankCard",
+        "status": "Completed",
+        "daysAgo": 1
+      },
+      {
+        "id": "WD2611101744320kHmAdtEepK",
+        "time": "2026-11-10 19:47:44",
+        "cash": 15000,
+        "method": "BankCard",
+        "status": "Rejected",
+        "remarkTitle": "【Withdrawal Cancelled Successfully】",
+        "remarkBody": "Your withdrawal request has been successfully canceled as per your request. Thank you!",
+        "daysAgo": 1
+      },
+      {
+        "id": "WD261106141109302pQrStUvWxY",
+        "time": "2026-11-06 14:11:09",
+        "cash": 5500,
+        "method": "BankCard",
+        "status": "Completed",
+        "daysAgo": 5
+      },
+      {
+        "id": "WD261025093218440aBcDeFgHiJ",
+        "time": "2026-10-25 09:32:18",
+        "cash": 8000,
+        "method": "USDT",
+        "status": "Completed",
+        "daysAgo": 17
+      }
+    ],
+    "giftHistory": [],
+    "balanceRecords": [
+      {
+        "type": "Send Commission",
+        "category": "Income",
+        "time": "2026-11-11 00:45:47",
+        "change": "+10.31",
+        "balance": "11.87",
+        "isIncome": true
+      },
+      {
+        "type": "Withdraw",
+        "category": "Expense",
+        "time": "2026-11-10 23:25:28",
+        "change": "-11000",
+        "balance": "1.56",
+        "isIncome": false
+      },
+      {
+        "type": "Withdraw",
+        "category": "Expense",
+        "time": "2026-11-10 22:53:47",
+        "change": "-4000",
+        "balance": "11001.56",
+        "isIncome": false
+      },
+      {
+        "type": "Withdraw Reject",
+        "category": "Income",
+        "time": "2026-11-10 22:51:51",
+        "change": "+15000",
+        "balance": "15001.56",
+        "isIncome": true
+      },
+      {
+        "type": "Withdraw",
+        "category": "Expense",
+        "time": "2026-11-10 19:47:44",
+        "change": "-15000",
+        "balance": "1.56",
+        "isIncome": false
+      },
+      {
+        "type": "Bonus Deposit",
+        "category": "Income",
+        "time": "2026-11-10 19:31:13",
+        "change": "+15000",
+        "balance": "15001.56",
+        "note": "ads funds",
+        "isIncome": true
+      },
+      {
+        "type": "Lucky Multiplier Bonus",
+        "category": "Income",
+        "time": "2026-11-10 13:09:43",
+        "change": "+1.56",
+        "balance": "1.56",
+        "isIncome": true
+      }
+    ],
+    "depositConfig": {
+      "minAmount": 100,
+      "maxAmount": 50000,
+      "fallbackBonusPct": 15,
+      "checkoutTitle": "UPI-QR Instant Checkout",
+      "tips": [
+        "1. Each deposit will be credited within 1-5 minutes.",
+        "2. After payment is successful, return to 6ECLUB to check balance.",
+        "3. Please do not modify the payment amount or reuse saved QR codes."
+      ],
+      "presets": [
+        {
+          "amount": 200,
+          "bonus": 38,
+          "label": "₹200",
+          "badge": "+38"
+        },
+        {
+          "amount": 300,
+          "bonus": 38,
+          "label": "₹300",
+          "badge": "+38"
+        },
+        {
+          "amount": 400,
+          "bonus": 38,
+          "label": "₹400",
+          "badge": "+38"
+        },
+        {
+          "amount": 500,
+          "bonus": 68,
+          "label": "₹500",
+          "badge": "+68"
+        },
+        {
+          "amount": 600,
+          "bonus": 68,
+          "label": "₹600",
+          "badge": "+68"
+        },
+        {
+          "amount": 700,
+          "bonus": 68,
+          "label": "₹700",
+          "badge": "+68"
+        },
+        {
+          "amount": 1500,
+          "bonus": 118,
+          "label": "₹1,500",
+          "badge": "+118"
+        },
+        {
+          "amount": 3000,
+          "bonus": 228,
+          "label": "₹3,000",
+          "badge": "+228"
+        },
+        {
+          "amount": 5000,
+          "bonus": 228,
+          "label": "₹5,000",
+          "badge": "+228"
+        }
+      ],
+      "channels": [
+        {
+          "enabled": true,
+          "id": "upi-qr",
+          "name": "UPI-QR",
+          "bonusTag": "+50%",
+          "recommended": true,
+          "lightBg": true,
+          "img": "assets/misc/020036351-156512-file_20261001140036327.webp"
+        },
+        {
+          "enabled": true,
+          "id": "innate-upi",
+          "name": "Innate UPI-QR",
+          "bonusTag": "+50%",
+          "recommended": false,
+          "lightBg": true,
+          "img": "assets/misc/020110754-156513-file_20261001140110738.webp"
+        },
+        {
+          "enabled": true,
+          "id": "paytm",
+          "name": "PayTM",
+          "bonusTag": "+50%",
+          "recommended": false,
+          "img": "assets/misc/020129301-156515-file_20261001140129279.webp"
+        },
+        {
+          "enabled": true,
+          "id": "usdt-trc20",
+          "name": "USDT-TRC20",
+          "bonusTag": "+50%",
+          "recommended": false,
+          "img": "assets/misc/034631416-232569-file_20261102154631415.webp"
+        },
+        {
+          "enabled": true,
+          "id": "usdt-bep20",
+          "name": "USDT-BEP20",
+          "bonusTag": "+50%",
+          "recommended": false,
+          "img": "assets/misc/034703398-232572-file_20261102154703397.webp"
+        },
+        {
+          "enabled": true,
+          "id": "arpay",
+          "name": "ARPay",
+          "bonusTag": "+50%",
+          "recommended": false,
+          "img": "assets/misc/020228794-156525-file_20261001140228793.webp"
+        }
+      ]
+    },
+    "withdrawConfig": {
+      "minAmount": 110,
+      "maxAmount": 50000,
+      "remainingLimit": 50000,
+      "dailyLimit": 5,
+      "arrivalText": "24 hours"
+    },
+    "wingoRounds": [
+      {
+        "period": "20261111100050896",
+        "num": 6
+      },
+      {
+        "period": "20261111100050895",
+        "num": 1
+      },
+      {
+        "period": "20261111100050894",
+        "num": 5
+      },
+      {
+        "period": "20261111100050893",
+        "num": 6
+      },
+      {
+        "period": "20261111100050892",
+        "num": 8
+      },
+      {
+        "period": "20261111100050891",
+        "num": 1
+      },
+      {
+        "period": "20261111100050890",
+        "num": 3
+      },
+      {
+        "period": "20261111100050889",
+        "num": 0
+      },
+      {
+        "period": "20261111100050888",
+        "num": 7
+      },
+      {
+        "period": "20261111100050887",
+        "num": 6
+      }
+    ],
+    "wingoMyBets": [],
+    "wingoLastDrawTs": 1794402089737,
+    "claimedMilestones": [],
+    "language": "EN"
+  }
+}

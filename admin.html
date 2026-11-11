@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="icon" href="data:,">
+  <title>6E.CLUB — Admin Panel</title>
+  <style>
+    :root {
+      --adm-bg: #031912;
+      --adm-surface: #07261d;
+      --adm-surface-2: #0a3327;
+      --adm-surface-3: #041d15;
+      --adm-border: rgba(43, 196, 132, 0.24);
+      --adm-border-strong: rgba(43, 196, 132, 0.5);
+      --adm-accent: #2bc484;
+      --adm-accent-dark: #14965f;
+      --adm-gold: #ffca47;
+      --adm-yellow: #eacf00;
+      --adm-red: #ff5b5b;
+      --adm-green: #00d315;
+      --adm-text: #eaf9f3;
+      --adm-muted: #82b8a3;
+      --adm-radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--adm-bg);
+      color: var(--adm-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+
+    .adm-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(3, 25, 18, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--adm-border);
+      padding: 12px 16px;
+    }
+
+    .adm-header-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .adm-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .adm-logo-badge {
+      background: linear-gradient(135deg, #39df95, #14965f);
+      color: #032116;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.4px;
+    }
+
+    .adm-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .adm-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .adm-sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--adm-surface-2);
+      border: 1px solid var(--adm-border);
+      font-size: 12px;
+      color: var(--adm-muted);
+    }
+
+    .adm-sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--adm-accent);
+      box-shadow: 0 0 8px var(--adm-accent);
+    }
+
+    .adm-sync-pill.err .adm-sync-dot {
+      background: var(--adm-red);
+      box-shadow: 0 0 8px var(--adm-red);
+    }
+
+    .adm-shell {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 14px 16px 48px;
+    }
+
+    .adm-kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .adm-kpi {
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius);
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.12s ease;
+    }
+
+    .adm-kpi:hover { border-color: var(--adm-border-strong); transform: translateY(-1px); }
+    .adm-kpi-lbl { font-size: 11px; color: var(--adm-muted); margin-bottom: 3px; }
+    .adm-kpi-val { font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .adm-kpi-val.gold { color: var(--adm-gold); }
+    .adm-kpi-val.green { color: var(--adm-accent); }
+
+    .adm-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      scrollbar-width: thin;
+    }
+
+    .adm-tab {
+      flex: 0 0 auto;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border);
+      color: var(--adm-muted);
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.15s ease;
+    }
+
+    .adm-tab:hover { border-color: var(--adm-border-strong); color: #fff; }
+    .adm-tab.active {
+      background: linear-gradient(135deg, #2bc484, #14965f);
+      border-color: transparent;
+      color: #032116;
+    }
+
+    .adm-panel { display: none; }
+    .adm-panel.active { display: block; }
+
+    .adm-card {
+      background: var(--adm-surface);
+      border: 1px solid var(--adm-border);
+      border-radius: var(--adm-radius);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .adm-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .adm-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+
+    .adm-card-sub {
+      font-size: 12px;
+      color: var(--adm-muted);
+      margin: 2px 0 0;
+    }
+
+    .adm-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .adm-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .adm-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .adm-field:last-child { margin-bottom: 0; }
+
+    .adm-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--adm-muted);
+    }
+
+    .adm-input, .adm-select, .adm-textarea {
+      width: 100%;
+      background: var(--adm-surface-3);
+      border: 1px solid var(--adm-border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .adm-input:focus, .adm-select:focus, .adm-textarea:focus {
+      border-color: var(--adm-accent);
+    }
+
+    .adm-textarea { min-height: 82px; resize: vertical; }
+
+    .adm-btn-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .adm-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+    }
+
+    .adm-btn:active { transform: scale(0.98); }
+    .adm-btn-primary { background: linear-gradient(135deg, #2bc484, #14965f); color: #032116; }
+    .adm-btn-secondary { background: var(--adm-surface-2); border: 1px solid var(--adm-border); color: #dff7ec; }
+    .adm-btn-gold { background: rgba(255, 202, 71, 0.16); border: 1px solid rgba(255, 202, 71, 0.45); color: var(--adm-gold); }
+    .adm-btn-danger { background: rgba(255, 91, 91, 0.14); border: 1px solid rgba(255, 91, 91, 0.42); color: #ff8e8e; }
+    .adm-btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 7px; }
+
+    .adm-chip-list {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .adm-chip {
+      padding: 6px 11px;
+      border-radius: 8px;
+      background: var(--adm-surface-2);
+      border: 1px solid var(--adm-border);
+      font-size: 12px;
+      font-weight: 600;
+      color: #d6f4e8;
+    }
+
+    .adm-chip:hover { border-color: var(--adm-accent); }
+    .adm-chip.neg { color: #ff9a9a; border-color: rgba(255, 91, 91, 0.35); }
+
+    .adm-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .adm-item {
+      background: var(--adm-surface-3);
+      border: 1px solid var(--adm-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .adm-item.active-item {
+      border-color: var(--adm-accent);
+      background: rgba(43, 196, 132, 0.08);
+    }
+
+    .adm-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .adm-preset-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .adm-channel-row {
+      display: grid;
+      grid-template-columns: 44px 1.2fr 0.8fr auto auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .adm-ch-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px;
+    }
+
+    .adm-ch-thumb.light-bg { background: #fff; }
+
+    .adm-check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #d4f4e7;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .adm-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .adm-badge.income { background: rgba(0, 211, 21, 0.16); color: #36ef48; }
+    .adm-badge.expense { background: rgba(255, 91, 91, 0.16); color: #ff8c8c; }
+    .adm-badge.processing { background: rgba(255, 202, 71, 0.18); color: var(--adm-gold); }
+    .adm-badge.completed { background: rgba(43, 196, 132, 0.18); color: #40e29e; }
+    .adm-badge.rejected { background: rgba(255, 91, 91, 0.18); color: #ff8c8c; }
+
+    .adm-note-preview {
+      margin-top: 6px;
+      padding: 6px 10px;
+      border-radius: 7px;
+      background: #07261d;
+      border: 1px solid rgba(43, 196, 132, 0.18);
+      font-size: 12px;
+      color: var(--adm-muted);
+    }
+
+    .adm-filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .adm-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #0c3d2d;
+      border: 1px solid var(--adm-accent);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 100;
+      max-width: calc(100vw - 32px);
+      text-align: center;
+    }
+
+    .adm-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .adm-toast.err {
+      border-color: var(--adm-red);
+      background: #3b1315;
+    }
+
+    @media (max-width: 760px) {
+      .adm-kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .adm-grid-2, .adm-grid-3 { grid-template-columns: 1fr; }
+      .adm-preset-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .adm-channel-row { grid-template-columns: 40px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="adm-header">
+    <div class="adm-header-inner">
+      <div class="adm-brand">
+        <span class="adm-logo-badge">6E.CLUB</span>
+        <h1 class="adm-title">Admin Panel</h1>
+      </div>
+      <div class="adm-header-actions">
+        <div id="adm-sync-pill" class="adm-sync-pill">
+          <span class="adm-sync-dot"></span>
+          <span id="adm-sync-text">Connecting...</span>
+        </div>
+        <button id="adm-reload-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Refresh</button>
+        <a id="adm-open-app-link" class="adm-btn adm-btn-primary adm-btn-sm" href="index.html#/main">Open App</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="adm-shell">
+    <section class="adm-kpi-strip" aria-label="Quick Overview">
+      <div class="adm-kpi" data-jump="uid">
+        <div class="adm-kpi-lbl">UID</div>
+        <div id="kpi-uid" class="adm-kpi-val">—</div>
+      </div>
+      <div class="adm-kpi" data-jump="invite">
+        <div class="adm-kpi-lbl">Invite Code</div>
+        <div id="kpi-invite" class="adm-kpi-val green">—</div>
+      </div>
+      <div class="adm-kpi" data-jump="balance">
+        <div class="adm-kpi-lbl">Cash Balance</div>
+        <div id="kpi-balance" class="adm-kpi-val gold">—</div>
+      </div>
+      <div class="adm-kpi" data-jump="withdraw">
+        <div class="adm-kpi-lbl">Withdrawable</div>
+        <div id="kpi-withdrawable" class="adm-kpi-val gold">—</div>
+      </div>
+    </section>
+
+    <nav class="adm-tabs" aria-label="Admin Sections">
+      <button class="adm-tab active" data-tab="uid" type="button">1. UID</button>
+      <button class="adm-tab" data-tab="invite" type="button">2. Invite Link</button>
+      <button class="adm-tab" data-tab="deposit" type="button">3. Deposit Section</button>
+      <button class="adm-tab" data-tab="withdraw" type="button">4. Withdrawal Section</button>
+      <button class="adm-tab" data-tab="records" type="button">5. Balance Record</button>
+      <button class="adm-tab" data-tab="balance" type="button">6. Balance</button>
+    </nav>
+
+    <!-- 1. UID SECTION -->
+    <section id="panel-uid" class="adm-panel active">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Modify UID</h2>
+            <p class="adm-card-sub">Updates UID on Mine (#/main) and Account &amp; Security (#/security) live.</p>
+          </div>
+          <button id="uid-random-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Random 6-Digit</button>
+        </div>
+        <div class="adm-field">
+          <label class="adm-label" for="inp-uid">User UID</label>
+          <input id="inp-uid" class="adm-input" type="text" placeholder="e.g. 172688" maxlength="24">
+        </div>
+        <div class="adm-btn-row">
+          <button id="save-uid-btn" class="adm-btn adm-btn-primary" type="button">Save UID</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. INVITE LINK SECTION -->
+    <section id="panel-invite" class="adm-panel">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Modify Invite Link &amp; Code</h2>
+            <p class="adm-card-sub">Controls Invite Code (#/earn) and Share / Copy Link URL (#/share).</p>
+          </div>
+          <button id="invite-build-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Build URL from Code</button>
+        </div>
+        <div class="adm-grid-2">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-invite-code">Invite Code</label>
+            <input id="inp-invite-code" class="adm-input" type="text" placeholder="e.g. QZ54MEN" maxlength="32">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-invite-link">Full Invite Link (URL)</label>
+            <input id="inp-invite-link" class="adm-input" type="url" placeholder="https://6eclubt3o.com/#/register?code=QZ54MEN">
+          </div>
+        </div>
+        <div class="adm-btn-row" style="margin-top:12px;">
+          <button id="save-invite-btn" class="adm-btn adm-btn-primary" type="button">Save Invite Link</button>
+          <button id="copy-invite-btn" class="adm-btn adm-btn-secondary" type="button">Copy Invite Link</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. DEPOSIT SECTION -->
+    <section id="panel-deposit" class="adm-panel">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Deposit Limits &amp; Messages</h2>
+            <p class="adm-card-sub">Controls Deposit page (#/wallet/recharge) limits, bonus percentage, and tips.</p>
+          </div>
+          <button id="save-deposit-btn" class="adm-btn adm-btn-primary" type="button">Save Deposit Section</button>
+        </div>
+        <div class="adm-grid-2">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-dep-min">Min Deposit (₹)</label>
+            <input id="inp-dep-min" class="adm-input" type="number" min="1" step="1">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-dep-max">Max Deposit (₹)</label>
+            <input id="inp-dep-max" class="adm-input" type="number" min="1" step="1">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-dep-bonus-pct">Custom Amount Bonus (%)</label>
+            <input id="inp-dep-bonus-pct" class="adm-input" type="number" min="0" step="1">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-dep-checkout-title">Checkout Modal Title</label>
+            <input id="inp-dep-checkout-title" class="adm-input" type="text" placeholder="UPI-QR Instant Checkout">
+          </div>
+        </div>
+        <div class="adm-field" style="margin-top:12px;">
+          <label class="adm-label" for="inp-dep-tips">Deposit Tips (one line per bullet)</label>
+          <textarea id="inp-dep-tips" class="adm-textarea" placeholder="1. Each deposit will be credited within 1-5 minutes."></textarea>
+        </div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Deposit Amount Presets</h2>
+            <p class="adm-card-sub">Edit preset amount chips, bonus ₹, display label, and badge tag.</p>
+          </div>
+          <div class="adm-btn-row">
+            <button id="add-dep-preset-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">+ Add Preset</button>
+            <button id="save-deposit-btn-2" class="adm-btn adm-btn-primary adm-btn-sm" type="button">Save All Deposit Changes</button>
+          </div>
+        </div>
+        <div id="dep-presets-list" class="adm-list"></div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Payment Channels</h2>
+            <p class="adm-card-sub">Toggle channels, update bonus badge (+50%), mark recommended, or add a new channel.</p>
+          </div>
+          <div class="adm-btn-row">
+            <button id="add-dep-ch-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">+ Add Channel</button>
+            <button id="save-deposit-btn-3" class="adm-btn adm-btn-primary adm-btn-sm" type="button">Save All Deposit Changes</button>
+          </div>
+        </div>
+        <div id="dep-channels-list" class="adm-list"></div>
+      </div>
+    </section>
+
+    <!-- 4. WITHDRAWAL SECTION -->
+    <section id="panel-withdraw" class="adm-panel">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Withdrawal Limits, Withdrawable &amp; Wager</h2>
+            <p class="adm-card-sub">Updates Withdraw page (#/wallet/withdraw) limits, wager requirement, and withdrawable balance.</p>
+          </div>
+          <button id="wd-match-bal-btn" class="adm-btn adm-btn-gold adm-btn-sm" type="button">Set Withdrawable = Cash Balance</button>
+        </div>
+        <div class="adm-grid-3">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wd-withdrawable">Withdrawable Balance (₹)</label>
+            <input id="inp-wd-withdrawable" class="adm-input" type="number" step="0.01" min="0">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wd-wager">Wager Required to Withdraw (₹)</label>
+            <input id="inp-wd-wager" class="adm-input" type="number" step="0.01" min="0">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wd-daily">Withdrawal Daily Limit</label>
+            <input id="inp-wd-daily" class="adm-input" type="text" placeholder="5">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wd-min">Min Withdrawal (₹)</label>
+            <input id="inp-wd-min" class="adm-input" type="number" step="1" min="0">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wd-max">Max Withdrawal (₹)</label>
+            <input id="inp-wd-max" class="adm-input" type="number" step="1" min="0">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wd-rem-limit">Remaining Withdrawal Limit (₹)</label>
+            <input id="inp-wd-rem-limit" class="adm-input" type="number" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="adm-field" style="margin-top:12px;">
+          <label class="adm-label" for="inp-wd-arrival">Arrival Time Notice Highlight</label>
+          <input id="inp-wd-arrival" class="adm-input" type="text" placeholder="24 hours">
+        </div>
+        <div class="adm-btn-row" style="margin-top:12px;">
+          <button id="save-wd-settings-btn" class="adm-btn adm-btn-primary" type="button">Save Withdrawal Settings</button>
+        </div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Bound Withdrawal Accounts</h2>
+            <p class="adm-card-sub">Add, edit, activate, or remove bank cards / UPI / USDT / ARPay accounts.</p>
+          </div>
+        </div>
+        <div class="adm-grid-2" style="margin-bottom:10px;">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-acct-type">Account Type</label>
+            <select id="inp-acct-type" class="adm-select">
+              <option value="BankCard">BankCard</option>
+              <option value="UPI">UPI</option>
+              <option value="USDT">USDT</option>
+              <option value="ARPay">ARPay</option>
+            </select>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-acct-label">Bank Name / Label</label>
+            <input id="inp-acct-label" class="adm-input" type="text" placeholder="e.g. JIO PAYMENTS BANK LIMITED">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-acct-detail">Account No / UPI ID / Wallet Address</label>
+            <input id="inp-acct-detail" class="adm-input" type="text" placeholder="e.g. 001521711947196">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-acct-ifsc">IFSC / Network (Optional)</label>
+            <input id="inp-acct-ifsc" class="adm-input" type="text" placeholder="e.g. JIOP0000001">
+          </div>
+        </div>
+        <div class="adm-btn-row" style="margin-bottom:14px;">
+          <button id="save-wd-acct-btn" class="adm-btn adm-btn-primary adm-btn-sm" type="button">Add Withdrawal Account</button>
+          <button id="cancel-wd-acct-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button" style="display:none;">Cancel Edit</button>
+        </div>
+        <div id="wd-accts-list" class="adm-list"></div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Withdrawal History (#/wallet/withdrawHistory)</h2>
+            <p class="adm-card-sub">Add new withdrawal orders or change status (Processing / Completed / Rejected) with remarks.</p>
+          </div>
+        </div>
+        <div class="adm-grid-3" style="margin-bottom:10px;">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-id">Order ID</label>
+            <div style="display:flex;gap:6px;">
+              <input id="inp-wh-id" class="adm-input" type="text" placeholder="WD...">
+              <button id="wh-gen-id-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Gen</button>
+            </div>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-cash">Cash (₹)</label>
+            <input id="inp-wh-cash" class="adm-input" type="number" step="0.01" placeholder="11000">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-method">Method</label>
+            <select id="inp-wh-method" class="adm-select">
+              <option value="BankCard">BankCard</option>
+              <option value="USDT">USDT</option>
+              <option value="UPI">UPI</option>
+              <option value="ARPay">ARPay</option>
+            </select>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-status">Status</label>
+            <select id="inp-wh-status" class="adm-select">
+              <option value="Processing">Processing</option>
+              <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-time">Time (YYYY-MM-DD HH:MM:SS)</label>
+            <div style="display:flex;gap:6px;">
+              <input id="inp-wh-time" class="adm-input" type="text">
+              <button id="wh-now-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Now</button>
+            </div>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-days">Days Ago (Period filter: 0..30)</label>
+            <input id="inp-wh-days" class="adm-input" type="number" min="0" max="365" value="0">
+          </div>
+        </div>
+        <div class="adm-grid-2" style="margin-bottom:10px;">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-rtitle">Rejected Remark Title (optional)</label>
+            <input id="inp-wh-rtitle" class="adm-input" type="text" placeholder="【Withdrawal Cancelled Successfully】">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-wh-rbody">Rejected Remark Body (optional)</label>
+            <input id="inp-wh-rbody" class="adm-input" type="text" placeholder="Your withdrawal request has been canceled...">
+          </div>
+        </div>
+        <div class="adm-btn-row" style="margin-bottom:14px;">
+          <button id="save-wh-item-btn" class="adm-btn adm-btn-primary adm-btn-sm" type="button">Add Withdrawal Order</button>
+          <button id="cancel-wh-item-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button" style="display:none;">Cancel Edit</button>
+        </div>
+        <div id="wh-history-list" class="adm-list"></div>
+      </div>
+    </section>
+
+    <!-- 5. BALANCE RECORD SECTION -->
+    <section id="panel-records" class="adm-panel">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 id="rec-form-heading" class="adm-card-title">Add Balance Record (#/records Details)</h2>
+            <p class="adm-card-sub">Create, edit, reorder, or delete entries shown on the Balance Record page.</p>
+          </div>
+        </div>
+        <div class="adm-grid-3" style="margin-bottom:10px;">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-rec-type">Type</label>
+            <input id="inp-rec-type" class="adm-input" type="text" placeholder="e.g. Bonus Deposit, Send Commission, Withdraw">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-rec-cat">Category</label>
+            <select id="inp-rec-cat" class="adm-select">
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-rec-change">Change (e.g. +15000 or -4000)</label>
+            <input id="inp-rec-change" class="adm-input" type="text" placeholder="+15000">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-rec-bal">Balance Shown</label>
+            <div style="display:flex;gap:6px;">
+              <input id="inp-rec-bal" class="adm-input" type="text" placeholder="15001.56">
+              <button id="rec-fill-bal-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Current</button>
+            </div>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-rec-time">Time (YYYY-MM-DD HH:MM:SS)</label>
+            <div style="display:flex;gap:6px;">
+              <input id="inp-rec-time" class="adm-input" type="text">
+              <button id="rec-now-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button">Now</button>
+            </div>
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-rec-note">Optional Note Box (e.g. ads funds)</label>
+            <input id="inp-rec-note" class="adm-input" type="text" placeholder="Optional note under row">
+          </div>
+        </div>
+        <div class="adm-btn-row">
+          <button id="save-rec-btn" class="adm-btn adm-btn-primary adm-btn-sm" type="button">Add Balance Record</button>
+          <button id="cancel-rec-btn" class="adm-btn adm-btn-secondary adm-btn-sm" type="button" style="display:none;">Cancel Edit</button>
+        </div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-filter-bar">
+          <div class="adm-chip-list">
+            <button class="adm-tab active" data-rec-filter="All" type="button">All</button>
+            <button class="adm-tab" data-rec-filter="Income" type="button">Income</button>
+            <button class="adm-tab" data-rec-filter="Expense" type="button">Expense</button>
+          </div>
+          <input id="rec-search-inp" class="adm-input" style="max-width:240px;" type="text" placeholder="Search type or note...">
+        </div>
+        <div id="records-list" class="adm-list"></div>
+      </div>
+    </section>
+
+    <!-- 6. BALANCE SECTION -->
+    <section id="panel-balance" class="adm-panel">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Set Exact Cash Balance</h2>
+            <p class="adm-card-sub">Modifies user wallet balance across Home, Mine, Deposit, Withdraw, and WinGo.</p>
+          </div>
+        </div>
+        <div class="adm-grid-2">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-bal-exact">Cash Balance (₹)</label>
+            <input id="inp-bal-exact" class="adm-input" type="number" step="0.01" min="0" placeholder="0.00">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label">Quick Options</label>
+            <div style="display:flex;flex-direction:column;gap:8px;padding-top:4px;">
+              <label class="adm-check-label">
+                <input id="chk-bal-log-exact" type="checkbox">
+                <span>Also add Balance Record entry for change</span>
+              </label>
+              <label class="adm-check-label">
+                <input id="chk-bal-sync-wd-exact" type="checkbox">
+                <span>Also match Withdrawable balance to this amount</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="adm-btn-row" style="margin-top:12px;">
+          <button id="save-bal-exact-btn" class="adm-btn adm-btn-primary" type="button">Apply Exact Balance</button>
+        </div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <h2 class="adm-card-title">Quick Adjust Balance (+ / -)</h2>
+            <p class="adm-card-sub">Add or deduct an amount with optional automatic Balance Record logging.</p>
+          </div>
+        </div>
+        <div class="adm-chip-list" style="margin-bottom:12px;">
+          <button class="adm-chip" data-bal-preset="100" type="button">+₹100</button>
+          <button class="adm-chip" data-bal-preset="500" type="button">+₹500</button>
+          <button class="adm-chip" data-bal-preset="1000" type="button">+₹1,000</button>
+          <button class="adm-chip" data-bal-preset="5000" type="button">+₹5,000</button>
+          <button class="adm-chip" data-bal-preset="15000" type="button">+₹15,000</button>
+        </div>
+        <div class="adm-grid-3" style="margin-bottom:12px;">
+          <div class="adm-field">
+            <label class="adm-label" for="inp-bal-delta">Amount (₹)</label>
+            <input id="inp-bal-delta" class="adm-input" type="number" step="0.01" min="0.01" value="500">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-bal-rec-type">Record Type Label</label>
+            <input id="inp-bal-rec-type" class="adm-input" type="text" value="Bonus Deposit">
+          </div>
+          <div class="adm-field">
+            <label class="adm-label" for="inp-bal-rec-note">Optional Note (e.g. ads funds)</label>
+            <input id="inp-bal-rec-note" class="adm-input" type="text" placeholder="Optional note">
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
+          <label class="adm-check-label">
+            <input id="chk-bal-log-delta" type="checkbox" checked>
+            <span>Log adjustment in Balance Record</span>
+          </label>
+          <label class="adm-check-label">
+            <input id="chk-bal-sync-wd-delta" type="checkbox">
+            <span>Also add/subtract on Withdrawable balance</span>
+          </label>
+        </div>
+        <div class="adm-btn-row">
+          <button id="add-bal-delta-btn" class="adm-btn adm-btn-primary" type="button">+ Add to Balance</button>
+          <button id="sub-bal-delta-btn" class="adm-btn adm-btn-danger" type="button">- Subtract from Balance</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="adm-toast" class="adm-toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const ADMIN_CLIENT_ID = 'admin_' + Math.random().toString(36).slice(2, 8) + '_' + Date.now().toString(36);
+      const CHANNEL_ICON_CHOICES = [
+        { label: 'UPI-QR', img: 'assets/misc/020036351-156512-file_20261001140036327.webp', lightBg: true },
+        { label: 'Innate UPI-QR', img: 'assets/misc/020110754-156513-file_20261001140110738.webp', lightBg: true },
+        { label: 'PayTM', img: 'assets/misc/020129301-156515-file_20261001140129279.webp', lightBg: false },
+        { label: 'USDT-TRC20', img: 'assets/misc/034631416-232569-file_20261102154631415.webp', lightBg: false },
+        { label: 'USDT-BEP20', img: 'assets/misc/034703398-232572-file_20261102154703397.webp', lightBg: false },
+        { label: 'ARPay', img: 'assets/misc/020228794-156525-file_20261001140228793.webp', lightBg: false }
+      ];
+
+      let serverShared = null;
+      let serverVersion = 0;
+      let activeTab = 'uid';
+      let recFilter = 'All';
+      let recSearch = '';
+      let editingAcctId = null;
+      let editingWhIndex = null;
+      let editingRecIndex = null;
+      let draftDepositPresets = [];
+      let draftDepositChannels = [];
+      let depositDraftDirty = false;
+      let toastTimer = null;
+      let sseSource = null;
+      let syncMode = 'sse';
+      let pollIntervalMs = 1500;
+      let pollTimer = null;
+      let pollInFlight = false;
+
+      function esc(str) {
+        return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[c]);
+      }
+
+      function clone(v) {
+        return JSON.parse(JSON.stringify(v));
+      }
+
+      function nowStr() {
+        const d = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
+
+      function fmtMoney(n) {
+        const num = Number(n || 0);
+        return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function showToast(msg, isErr) {
+        const el = document.getElementById('adm-toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.toggle('err', !!isErr);
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+      }
+
+      function setSyncStatus(text, isErr) {
+        const pill = document.getElementById('adm-sync-pill');
+        const label = document.getElementById('adm-sync-text');
+        if (pill) pill.classList.toggle('err', !!isErr);
+        if (label) label.textContent = text;
+      }
+
+      function defaultDepositConfig() {
+        return {
+          minAmount: 100,
+          maxAmount: 50000,
+          fallbackBonusPct: 15,
+          checkoutTitle: 'UPI-QR Instant Checkout',
+          tips: [
+            '1. Each deposit will be credited within 1-5 minutes.',
+            '2. After payment is successful, return to 6ECLUB to check balance.',
+            '3. Please do not modify the payment amount or reuse saved QR codes.'
+          ],
+          presets: [
+            { amount: 200, bonus: 38, label: '₹200', badge: '+38' },
+            { amount: 300, bonus: 38, label: '₹300', badge: '+38' },
+            { amount: 400, bonus: 38, label: '₹400', badge: '+38' },
+            { amount: 500, bonus: 68, label: '₹500', badge: '+68' },
+            { amount: 600, bonus: 68, label: '₹600', badge: '+68' },
+            { amount: 700, bonus: 68, label: '₹700', badge: '+68' },
+            { amount: 1500, bonus: 118, label: '₹1,500', badge: '+118' },
+            { amount: 3000, bonus: 228, label: '₹3,000', badge: '+228' },
+            { amount: 5000, bonus: 228, label: '₹5,000', badge: '+228' }
+          ],
+          channels: CHANNEL_ICON_CHOICES.map((c, idx) => ({
+            id: c.label.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            name: c.label,
+            bonusTag: '+50%',
+            recommended: idx === 0,
+            enabled: true,
+            lightBg: c.lightBg,
+            img: c.img
+          }))
+        };
+      }
+
+      function defaultWithdrawConfig() {
+        return {
+          minAmount: 110,
+          maxAmount: 50000,
+          remainingLimit: 50000,
+          dailyLimit: 5,
+          arrivalText: '24 hours'
+        };
+      }
+
+      let apiBase = null;
+      let sseReconnectTimer = null;
+
+      function getApiCandidates() {
+        const list = [];
+        if (apiBase !== null) list.push(apiBase);
+        const proto = window.location.protocol;
+        const host = window.location.hostname;
+        if (proto === 'http:' || proto === 'https:') {
+          list.push('');
+          if (host && host !== '127.0.0.1' && host !== 'localhost') {
+            list.push('http://' + host + ':3000');
+          }
+        }
+        list.push('http://127.0.0.1:3000', 'http://localhost:3000');
+        return list.filter((v, i, a) => a.indexOf(v) === i);
+      }
+
+      function syncOpenAppHref() {
+        const link = document.getElementById('adm-open-app-link');
+        if (!link) return;
+        link.href = apiBase ? (apiBase + '/#/main') : (window.location.protocol === 'file:' ? 'index.html#/main' : '/#/main');
+      }
+
+      function syncLabel() {
+        return (syncMode === 'poll' ? 'Cloud Sync • v' : 'Live Sync • v') + serverVersion;
+      }
+
+      async function fetchState(opts) {
+        const isDelta = !!(opts && opts.deltaCheck && serverVersion > 0);
+        if (isDelta && pollInFlight) return { unchanged: true };
+        if (isDelta) pollInFlight = true;
+        const candidates = getApiCandidates();
+        let lastErr = null;
+        try {
+          for (const base of candidates) {
+            try {
+              const qs = isDelta ? ('?since=' + encodeURIComponent(serverVersion)) : '';
+              const res = await fetch(base + '/api/state' + qs, { cache: 'no-store' });
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              const data = await res.json();
+              if (!data || !data.ok) throw new Error('Invalid state response');
+              apiBase = base;
+              syncOpenAppHref();
+              if (data.syncMode === 'poll' || data.sse === false) {
+                syncMode = 'poll';
+                if (data.pollIntervalMs) pollIntervalMs = Math.max(1000, Number(data.pollIntervalMs));
+              }
+              if (data.unchanged) {
+                setSyncStatus(syncLabel(), false);
+                return data;
+              }
+              if (!data.shared) throw new Error('Invalid state response');
+              serverShared = data.shared;
+              serverVersion = Number(data.version || 0);
+              setSyncStatus(syncLabel(), false);
+              return data;
+            } catch (err) {
+              lastErr = err;
+            }
+          }
+          throw lastErr || new Error('Server unreachable');
+        } finally {
+          if (isDelta) pollInFlight = false;
+        }
+      }
+
+      async function mutateAndSave(reason, mutatorFn) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const latest = await fetchState();
+            const nextShared = clone(latest.shared);
+            mutatorFn(nextShared);
+            const base = apiBase || '';
+            const res = await fetch(base + '/api/state', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              cache: 'no-store',
+              body: JSON.stringify({
+                clientId: ADMIN_CLIENT_ID,
+                baseVersion: latest.version,
+                reason: reason || 'admin_update',
+                shared: nextShared
+              })
+            });
+            const data = await res.json().catch(() => null);
+            if (res.status === 409) continue;
+            if (!res.ok || !data || !data.ok) {
+              throw new Error((data && data.error) || 'Failed to save state');
+            }
+            if (data.syncMode === 'poll' || data.sse === false) {
+              syncMode = 'poll';
+            }
+            serverShared = data.shared;
+            serverVersion = Number(data.version || 0);
+            setSyncStatus(syncLabel(), false);
+            syncAllPanels(true);
+            return data;
+          } catch (err) {
+            if (attempt === 2) {
+              setSyncStatus('Save failed', true);
+              throw err;
+            }
+          }
+        }
+        throw new Error('Version conflict during save');
+      }
+
+      function switchTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('.adm-tab[data-tab]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.tab === tab);
+        });
+        document.querySelectorAll('.adm-panel').forEach((p) => {
+          p.classList.toggle('active', p.id === 'panel-' + tab);
+        });
+      }
+
+      function setValIfIdle(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (document.activeElement === el) return;
+        el.value = value == null ? '' : String(value);
+      }
+
+      function renderKpis() {
+        const u = (serverShared && serverShared.user) || {};
+        document.getElementById('kpi-uid').textContent = u.uid || '—';
+        document.getElementById('kpi-invite').textContent = u.inviteCode || '—';
+        document.getElementById('kpi-balance').textContent = fmtMoney(u.balance || 0);
+        document.getElementById('kpi-withdrawable').textContent = fmtMoney(u.withdrawable || 0);
+      }
+
+      function renderDepositPresetsList() {
+        const host = document.getElementById('dep-presets-list');
+        if (!host) return;
+        if (!draftDepositPresets.length) {
+          host.innerHTML = '<div class="adm-item" style="color:var(--adm-muted);">No presets configured. Click "+ Add Preset" above.</div>';
+          return;
+        }
+        host.innerHTML = draftDepositPresets.map((p, idx) => `
+          <div class="adm-item">
+            <div class="adm-preset-row">
+              <div class="adm-field" style="margin:0;">
+                <label class="adm-label">Amount (₹)</label>
+                <input class="adm-input" type="number" min="1" data-preset-field="amount" data-idx="${idx}" value="${esc(p.amount)}">
+              </div>
+              <div class="adm-field" style="margin:0;">
+                <label class="adm-label">Bonus (₹)</label>
+                <input class="adm-input" type="number" min="0" data-preset-field="bonus" data-idx="${idx}" value="${esc(p.bonus)}">
+              </div>
+              <div class="adm-field" style="margin:0;">
+                <label class="adm-label">Button Label</label>
+                <input class="adm-input" type="text" data-preset-field="label" data-idx="${idx}" value="${esc(p.label)}">
+              </div>
+              <div class="adm-field" style="margin:0;">
+                <label class="adm-label">Top Badge</label>
+                <input class="adm-input" type="text" data-preset-field="badge" data-idx="${idx}" value="${esc(p.badge)}">
+              </div>
+              <button class="adm-btn adm-btn-danger adm-btn-sm" type="button" data-del-preset="${idx}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function renderDepositChannelsList() {
+        const host = document.getElementById('dep-channels-list');
+        if (!host) return;
+        if (!draftDepositChannels.length) {
+          host.innerHTML = '<div class="adm-item" style="color:var(--adm-muted);">No channels configured. Click "+ Add Channel" above.</div>';
+          return;
+        }
+        host.innerHTML = draftDepositChannels.map((ch, idx) => `
+          <div class="adm-item">
+            <div class="adm-channel-row">
+              <img class="adm-ch-thumb ${ch.lightBg ? 'light-bg' : ''}" src="${esc(ch.img || CHANNEL_ICON_CHOICES[0].img)}" alt="">
+              <div class="adm-field" style="margin:0;">
+                <label class="adm-label">Channel Name</label>
+                <input class="adm-input" type="text" data-ch-field="name" data-idx="${idx}" value="${esc(ch.name)}">
+              </div>
+              <div class="adm-field" style="margin:0;">
+                <label class="adm-label">Bonus Tag</label>
+                <input class="adm-input" type="text" data-ch-field="bonusTag" data-idx="${idx}" value="${esc(ch.bonusTag)}" placeholder="+50%">
+              </div>
+              <label class="adm-check-label">
+                <input type="checkbox" data-ch-check="enabled" data-idx="${idx}" ${ch.enabled !== false ? 'checked' : ''}>
+                <span>Enabled</span>
+              </label>
+              <label class="adm-check-label">
+                <input type="checkbox" data-ch-check="recommended" data-idx="${idx}" ${ch.recommended ? 'checked' : ''}>
+                <span>👍 Top</span>
+              </label>
+              <button class="adm-btn adm-btn-danger adm-btn-sm" type="button" data-del-ch="${idx}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function getEffectiveWithdrawAccounts(s) {
+        const cfg = (s && s.withdrawConfig) || {};
+        const list = Array.isArray(s && s.withdrawAccounts) ? s.withdrawAccounts : [];
+        if (list.length) return list;
+        if (!cfg.allowEmptyAccounts && s && s.user && s.user.bankCard && s.user.bankCard.bankName) {
+          return [{
+            id: 'acct_default_bank',
+            type: 'BankCard',
+            label: s.user.bankCard.bankName,
+            detail: s.user.bankCard.accountNo || '',
+            ifsc: s.user.bankCard.ifsc || ''
+          }];
+        }
+        return [];
+      }
+
+      function renderWithdrawAccounts() {
+        const host = document.getElementById('wd-accts-list');
+        if (!host || !serverShared) return;
+        const accts = getEffectiveWithdrawAccounts(serverShared);
+        const selId = serverShared.selectedWdAccountId || (accts[0] ? accts[0].id : '');
+        if (!accts.length) {
+          host.innerHTML = '<div class="adm-item" style="color:var(--adm-muted);">No withdrawal accounts bound. The user app shows "+ Add Withdrawal Account".</div>';
+          return;
+        }
+        host.innerHTML = accts.map((a) => {
+          const isActive = a.id === selId;
+          return `
+            <div class="adm-item ${isActive ? 'active-item' : ''}">
+              <div class="adm-item-row">
+                <div>
+                  <div style="font-weight:700;color:#fff;">
+                    ${esc(a.label)}
+                    <span class="adm-badge ${isActive ? 'completed' : 'processing'}" style="margin-left:6px;">${esc(a.type)}${isActive ? ' • Active' : ''}</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--adm-muted);margin-top:2px;">
+                    ${esc(a.detail)}${a.ifsc ? ' • IFSC: ' + esc(a.ifsc) : ''}
+                  </div>
+                </div>
+                <div class="adm-btn-row">
+                  ${!isActive ? `<button class="adm-btn adm-btn-secondary adm-btn-sm" type="button" data-acct-activate="${esc(a.id)}">Set Active</button>` : ''}
+                  <button class="adm-btn adm-btn-secondary adm-btn-sm" type="button" data-acct-edit="${esc(a.id)}">Edit</button>
+                  <button class="adm-btn adm-btn-danger adm-btn-sm" type="button" data-acct-del="${esc(a.id)}">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderWithdrawHistory() {
+        const host = document.getElementById('wh-history-list');
+        if (!host || !serverShared) return;
+        const items = serverShared.withdrawalHistory || [];
+        if (!items.length) {
+          host.innerHTML = '<div class="adm-item" style="color:var(--adm-muted);">No withdrawal history items.</div>';
+          return;
+        }
+        host.innerHTML = items.map((item, idx) => {
+          const stClass = item.status === 'Completed' ? 'completed' : item.status === 'Rejected' ? 'rejected' : 'processing';
+          return `
+            <div class="adm-item">
+              <div class="adm-item-row">
+                <div>
+                  <div style="font-weight:700;color:#fff;">
+                    ${fmtMoney(item.cash)}
+                    <span class="adm-badge ${stClass}" style="margin-left:6px;">${esc(item.status)}</span>
+                    <span style="font-size:12px;color:var(--adm-muted);font-weight:500;margin-left:6px;">${esc(item.method)} • ${esc(item.daysAgo ?? 0)}d ago</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--adm-muted);margin-top:2px;">
+                    Order: ${esc(item.id)} • ${esc(item.time)}
+                  </div>
+                  ${(item.remarkTitle || item.remarkBody) ? `<div class="adm-note-preview">${esc(item.remarkTitle || '')} ${esc(item.remarkBody || '')}</div>` : ''}
+                </div>
+                <div class="adm-btn-row">
+                  ${item.status !== 'Completed' ? `<button class="adm-btn adm-btn-primary adm-btn-sm" type="button" data-wh-status="Completed" data-idx="${idx}">Complete</button>` : ''}
+                  ${item.status !== 'Processing' ? `<button class="adm-btn adm-btn-gold adm-btn-sm" type="button" data-wh-status="Processing" data-idx="${idx}">Processing</button>` : ''}
+                  ${item.status !== 'Rejected' ? `<button class="adm-btn adm-btn-danger adm-btn-sm" type="button" data-wh-status="Rejected" data-idx="${idx}">Reject</button>` : ''}
+                  <button class="adm-btn adm-btn-secondary adm-btn-sm" type="button" data-wh-edit="${idx}">Edit</button>
+                  <button class="adm-btn adm-btn-danger adm-btn-sm" type="button" data-wh-del="${idx}">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderBalanceRecordsList() {
+        const host = document.getElementById('records-list');
+        if (!host || !serverShared) return;
+        const list = serverShared.balanceRecords || [];
+        const q = recSearch.trim().toLowerCase();
+        const filtered = list
+          .map((item, origIdx) => ({ item, origIdx }))
+          .filter(({ item }) => {
+            if (recFilter !== 'All' && item.category !== recFilter) return false;
+            if (q) {
+              const hay = `${item.type || ''} ${item.note || ''} ${item.time || ''} ${item.change || ''}`.toLowerCase();
+              if (!hay.includes(q)) return false;
+            }
+            return true;
+          });
+
+        if (!filtered.length) {
+          host.innerHTML = '<div class="adm-item" style="color:var(--adm-muted);">No balance records matching current filter.</div>';
+          return;
+        }
+
+        host.innerHTML = filtered.map(({ item, origIdx }) => {
+          const isInc = item.category === 'Income' || item.isIncome;
+          return `
+            <div class="adm-item">
+              <div class="adm-item-row">
+                <div>
+                  <div style="font-weight:700;color:#fff;">
+                    ${esc(item.type)}
+                    <span class="adm-badge ${isInc ? 'income' : 'expense'}" style="margin-left:6px;">${esc(item.category || (isInc ? 'Income' : 'Expense'))}</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--adm-muted);margin-top:2px;">
+                    Time: ${esc(item.time)} • Change: <b style="color:${isInc ? '#36ef48' : '#ff9a9a'};">${esc(item.change)}</b> • Balance: <b style="color:var(--adm-yellow);">${esc(item.balance)}</b>
+                  </div>
+                  ${item.note ? `<div class="adm-note-preview">Note: ${esc(item.note)}</div>` : ''}
+                </div>
+                <div class="adm-btn-row">
+                  <button class="adm-btn adm-btn-secondary adm-btn-sm" type="button" data-rec-move="-1" data-idx="${origIdx}" ${origIdx === 0 ? 'disabled' : ''}>▲</button>
+                  <button class="adm-btn adm-btn-secondary adm-btn-sm" type="button" data-rec-move="1" data-idx="${origIdx}" ${origIdx === list.length - 1 ? 'disabled' : ''}>▼</button>
+                  <button class="adm-btn adm-btn-secondary adm-btn-sm" type="button" data-rec-edit="${origIdx}">Edit</button>
+                  <button class="adm-btn adm-btn-danger adm-btn-sm" type="button" data-rec-del="${origIdx}">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function syncAllPanels(forceDrafts) {
+        if (!serverShared) return;
+        const u = serverShared.user || {};
+        const defDep = defaultDepositConfig();
+        const depCfg = Object.assign({}, defDep, serverShared.depositConfig || {});
+        const wdCfg = Object.assign({}, defaultWithdrawConfig(), serverShared.withdrawConfig || {});
+
+        renderKpis();
+
+        // 1. UID
+        setValIfIdle('inp-uid', u.uid || '');
+
+        // 2. Invite Link
+        const code = u.inviteCode || '';
+        const link = u.inviteLink || `https://6eclubt3o.com/#/register?code=${code}`;
+        setValIfIdle('inp-invite-code', code);
+        setValIfIdle('inp-invite-link', link);
+
+        // 3. Deposit Section
+        setValIfIdle('inp-dep-min', depCfg.minAmount);
+        setValIfIdle('inp-dep-max', depCfg.maxAmount);
+        setValIfIdle('inp-dep-bonus-pct', depCfg.fallbackBonusPct);
+        setValIfIdle('inp-dep-checkout-title', depCfg.checkoutTitle);
+        setValIfIdle('inp-dep-tips', (depCfg.tips || []).join('\n'));
+        const activeInDeposit = !!(document.activeElement && document.activeElement.closest('#panel-deposit'));
+        if ((forceDrafts && !depositDraftDirty && !activeInDeposit) || !draftDepositPresets.length) {
+          draftDepositPresets = clone(depCfg.presets || defDep.presets);
+          renderDepositPresetsList();
+        }
+        if ((forceDrafts && !depositDraftDirty && !activeInDeposit) || !draftDepositChannels.length) {
+          draftDepositChannels = clone(depCfg.channels || defDep.channels);
+          renderDepositChannelsList();
+        }
+
+        // 4. Withdrawal Section
+        setValIfIdle('inp-wd-withdrawable', u.withdrawable ?? 0);
+        setValIfIdle('inp-wd-wager', u.wagerRequired ?? 450);
+        setValIfIdle('inp-wd-daily', wdCfg.dailyLimit ?? 5);
+        setValIfIdle('inp-wd-min', wdCfg.minAmount ?? 110);
+        setValIfIdle('inp-wd-max', wdCfg.maxAmount ?? 50000);
+        setValIfIdle('inp-wd-rem-limit', wdCfg.remainingLimit ?? 50000);
+        setValIfIdle('inp-wd-arrival', wdCfg.arrivalText || '24 hours');
+        if (!document.getElementById('inp-wh-time').value && editingWhIndex === null) {
+          document.getElementById('inp-wh-time').value = nowStr();
+        }
+        if (!document.getElementById('inp-wh-id').value && editingWhIndex === null) {
+          document.getElementById('inp-wh-id').value = 'WD' + Date.now() + 'kHm';
+        }
+        renderWithdrawAccounts();
+        renderWithdrawHistory();
+
+        // 5. Balance Records
+        if (!document.getElementById('inp-rec-time').value && editingRecIndex === null) {
+          document.getElementById('inp-rec-time').value = nowStr();
+        }
+        renderBalanceRecordsList();
+
+        // 6. Balance
+        setValIfIdle('inp-bal-exact', Number(u.balance || 0).toFixed(2));
+      }
+
+      function readDepositDraftInputs() {
+        document.querySelectorAll('[data-preset-field]').forEach((el) => {
+          const idx = Number(el.dataset.idx);
+          const field = el.dataset.presetField;
+          if (!draftDepositPresets[idx]) return;
+          if (field === 'amount' || field === 'bonus') {
+            draftDepositPresets[idx][field] = Number(el.value || 0);
+          } else {
+            draftDepositPresets[idx][field] = el.value;
+          }
+        });
+        document.querySelectorAll('[data-ch-field]').forEach((el) => {
+          const idx = Number(el.dataset.idx);
+          const field = el.dataset.chField;
+          if (draftDepositChannels[idx]) draftDepositChannels[idx][field] = el.value;
+        });
+        document.querySelectorAll('[data-ch-check]').forEach((el) => {
+          const idx = Number(el.dataset.idx);
+          const field = el.dataset.chCheck;
+          if (draftDepositChannels[idx]) draftDepositChannels[idx][field] = !!el.checked;
+        });
+      }
+
+      async function saveDepositSection() {
+        readDepositDraftInputs();
+        const minAmount = Math.max(1, Number(document.getElementById('inp-dep-min').value || 100));
+        const maxAmount = Math.max(minAmount, Number(document.getElementById('inp-dep-max').value || 50000));
+        const fallbackBonusPct = Math.max(0, Number(document.getElementById('inp-dep-bonus-pct').value || 0));
+        const checkoutTitle = (document.getElementById('inp-dep-checkout-title').value || '').trim() || 'UPI-QR Instant Checkout';
+        const tips = (document.getElementById('inp-dep-tips').value || '')
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        const cleanPresets = draftDepositPresets
+          .map((p) => {
+            const amt = Math.max(1, Number(p.amount || 0));
+            const bonus = Math.max(0, Number(p.bonus || 0));
+            return {
+              amount: amt,
+              bonus,
+              label: (p.label || '').trim() || ('₹' + amt.toLocaleString('en-IN')),
+              badge: p.badge !== undefined ? String(p.badge).trim() : (bonus > 0 ? '+' + bonus : '')
+            };
+          })
+          .filter((p) => p.amount > 0);
+
+        const cleanChannels = draftDepositChannels.map((c, idx) => ({
+          id: c.id || ('ch-' + idx + '-' + Date.now()),
+          name: (c.name || '').trim() || 'Channel ' + (idx + 1),
+          bonusTag: String(c.bonusTag || '').trim(),
+          recommended: !!c.recommended,
+          enabled: c.enabled !== false,
+          lightBg: !!c.lightBg,
+          img: c.img || CHANNEL_ICON_CHOICES[0].img
+        }));
+
+        try {
+          depositDraftDirty = false;
+          await mutateAndSave('admin_deposit_section', (s) => {
+            s.depositConfig = { minAmount, maxAmount, fallbackBonusPct, checkoutTitle, tips, presets: cleanPresets, channels: cleanChannels };
+          });
+          showToast('Deposit section updated & synced live');
+        } catch (err) {
+          depositDraftDirty = true;
+          showToast(err.message, true);
+        }
+      }
+
+      function formatSignedChange(raw, cat) {
+        const s = String(raw || '').trim();
+        if (!s) return cat === 'Expense' ? '-0' : '+0';
+        if (s.startsWith('+') || s.startsWith('-')) return s;
+        return (cat === 'Expense' ? '-' : '+') + s;
+      }
+
+      // Event Bindings
+      document.querySelectorAll('.adm-tab[data-tab]').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+      document.querySelectorAll('.adm-kpi[data-jump]').forEach((card) => {
+        card.addEventListener('click', () => switchTab(card.dataset.jump));
+      });
+
+      document.getElementById('adm-reload-btn').addEventListener('click', async () => {
+        try {
+          depositDraftDirty = false;
+          await fetchState();
+          syncAllPanels(true);
+          showToast('Refreshed latest server state');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      // 1. UID Actions
+      document.getElementById('uid-random-btn').addEventListener('click', () => {
+        document.getElementById('inp-uid').value = String(100000 + Math.floor(Math.random() * 899999));
+      });
+      document.getElementById('save-uid-btn').addEventListener('click', async () => {
+        const uid = (document.getElementById('inp-uid').value || '').trim();
+        if (!uid) { showToast('UID cannot be empty', true); return; }
+        try {
+          await mutateAndSave('admin_uid', (s) => {
+            s.user = s.user || {};
+            const phone = s.user.phone;
+            s.user.uid = uid;
+            if (Array.isArray(s.usersDb) && s.usersDb.length) {
+              const target = s.usersDb.find((u) => u.phone === phone) || s.usersDb[0];
+              if (target) target.uid = uid;
+            }
+          });
+          showToast('UID updated to ' + uid);
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      // 2. Invite Link Actions
+      document.getElementById('invite-build-btn').addEventListener('click', () => {
+        const code = (document.getElementById('inp-invite-code').value || '').trim();
+        document.getElementById('inp-invite-link').value = `https://6eclubt3o.com/#/register?code=${code}`;
+      });
+      document.getElementById('copy-invite-btn').addEventListener('click', () => {
+        const link = (document.getElementById('inp-invite-link').value || '').trim();
+        if (!link) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(link).catch(() => {});
+        }
+        showToast('Invite link copied!');
+      });
+      document.getElementById('save-invite-btn').addEventListener('click', async () => {
+        const inviteCode = (document.getElementById('inp-invite-code').value || '').trim();
+        const inviteLink = (document.getElementById('inp-invite-link').value || '').trim();
+        if (!inviteCode && !inviteLink) { showToast('Enter invite code or link', true); return; }
+        try {
+          await mutateAndSave('admin_invite_link', (s) => {
+            s.user = s.user || {};
+            if (inviteCode) s.user.inviteCode = inviteCode;
+            s.user.inviteLink = inviteLink || `https://6eclubt3o.com/#/register?code=${s.user.inviteCode || ''}`;
+          });
+          showToast('Invite link updated & synced live');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      // 3. Deposit Section Actions
+      document.getElementById('save-deposit-btn').addEventListener('click', saveDepositSection);
+      document.getElementById('save-deposit-btn-2').addEventListener('click', saveDepositSection);
+      document.getElementById('save-deposit-btn-3').addEventListener('click', saveDepositSection);
+      document.getElementById('add-dep-preset-btn').addEventListener('click', () => {
+        readDepositDraftInputs();
+        depositDraftDirty = true;
+        draftDepositPresets.push({ amount: 1000, bonus: 100, label: '₹1,000', badge: '+100' });
+        renderDepositPresetsList();
+      });
+      document.getElementById('add-dep-ch-btn').addEventListener('click', () => {
+        readDepositDraftInputs();
+        depositDraftDirty = true;
+        const iconPick = CHANNEL_ICON_CHOICES[draftDepositChannels.length % CHANNEL_ICON_CHOICES.length];
+        draftDepositChannels.push({
+          id: 'custom-' + Date.now(),
+          name: 'Custom Channel',
+          bonusTag: '+10%',
+          recommended: false,
+          enabled: true,
+          lightBg: iconPick.lightBg,
+          img: iconPick.img
+        });
+        renderDepositChannelsList();
+      });
+      document.getElementById('dep-presets-list').addEventListener('input', () => { depositDraftDirty = true; });
+      document.getElementById('dep-channels-list').addEventListener('input', () => { depositDraftDirty = true; });
+      document.getElementById('dep-channels-list').addEventListener('change', () => { depositDraftDirty = true; });
+      document.getElementById('dep-presets-list').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-preset]');
+        if (!delBtn) return;
+        readDepositDraftInputs();
+        depositDraftDirty = true;
+        draftDepositPresets.splice(Number(delBtn.dataset.delPreset), 1);
+        renderDepositPresetsList();
+      });
+      document.getElementById('dep-channels-list').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('[data-del-ch]');
+        if (!delBtn) return;
+        readDepositDraftInputs();
+        depositDraftDirty = true;
+        draftDepositChannels.splice(Number(delBtn.dataset.delCh), 1);
+        renderDepositChannelsList();
+      });
+
+      // 4. Withdrawal Section Actions
+      document.getElementById('wd-match-bal-btn').addEventListener('click', () => {
+        const bal = Number((serverShared && serverShared.user && serverShared.user.balance) || 0);
+        document.getElementById('inp-wd-withdrawable').value = bal.toFixed(2);
+      });
+      document.getElementById('save-wd-settings-btn').addEventListener('click', async () => {
+        const withdrawable = Math.max(0, Number(document.getElementById('inp-wd-withdrawable').value || 0));
+        const wagerRequired = Math.max(0, Number(document.getElementById('inp-wd-wager').value || 0));
+        const minAmount = Math.max(0, Number(document.getElementById('inp-wd-min').value || 0));
+        const maxAmount = Math.max(minAmount, Number(document.getElementById('inp-wd-max').value || 0));
+        const remainingLimit = Math.max(0, Number(document.getElementById('inp-wd-rem-limit').value || 0));
+        const dailyLimit = (document.getElementById('inp-wd-daily').value || '').trim() || '5';
+        const arrivalText = (document.getElementById('inp-wd-arrival').value || '').trim() || '24 hours';
+
+        try {
+          await mutateAndSave('admin_withdraw_settings', (s) => {
+            s.user = s.user || {};
+            s.user.withdrawable = +withdrawable.toFixed(2);
+            s.user.wagerRequired = +wagerRequired.toFixed(2);
+            const allowEmpty = !!(s.withdrawConfig && s.withdrawConfig.allowEmptyAccounts);
+            s.withdrawConfig = { minAmount, maxAmount, remainingLimit, dailyLimit, arrivalText, allowEmptyAccounts: allowEmpty };
+          });
+          showToast('Withdrawal settings updated');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      function resetAcctForm() {
+        editingAcctId = null;
+        document.getElementById('inp-acct-type').value = 'BankCard';
+        document.getElementById('inp-acct-label').value = '';
+        document.getElementById('inp-acct-detail').value = '';
+        document.getElementById('inp-acct-ifsc').value = '';
+        document.getElementById('save-wd-acct-btn').textContent = 'Add Withdrawal Account';
+        document.getElementById('cancel-wd-acct-btn').style.display = 'none';
+      }
+
+      document.getElementById('cancel-wd-acct-btn').addEventListener('click', resetAcctForm);
+      document.getElementById('save-wd-acct-btn').addEventListener('click', async () => {
+        const type = document.getElementById('inp-acct-type').value || 'BankCard';
+        const label = (document.getElementById('inp-acct-label').value || '').trim() || type;
+        const detail = (document.getElementById('inp-acct-detail').value || '').trim();
+        const ifsc = (document.getElementById('inp-acct-ifsc').value || '').trim();
+        if (!detail) { showToast('Enter account number / UPI / address', true); return; }
+
+        try {
+          await mutateAndSave('admin_withdraw_account', (s) => {
+            s.withdrawAccounts = clone(getEffectiveWithdrawAccounts(s));
+            s.withdrawConfig = Object.assign({}, defaultWithdrawConfig(), s.withdrawConfig || {}, { allowEmptyAccounts: false });
+            if (editingAcctId) {
+              const target = s.withdrawAccounts.find((a) => a.id === editingAcctId);
+              if (target) {
+                target.type = type;
+                target.label = label;
+                target.detail = detail;
+                target.ifsc = ifsc;
+              }
+            } else {
+              const id = 'acct_' + Date.now();
+              s.withdrawAccounts.push({ id, type, label, detail, ifsc });
+              s.selectedWdAccountId = id;
+            }
+          });
+          resetAcctForm();
+          showToast('Withdrawal account saved');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      document.getElementById('wd-accts-list').addEventListener('click', async (e) => {
+        const actBtn = e.target.closest('[data-acct-activate]');
+        if (actBtn) {
+          const id = actBtn.dataset.acctActivate;
+          try {
+            await mutateAndSave('admin_select_wd_acct', (s) => {
+              s.withdrawAccounts = clone(getEffectiveWithdrawAccounts(s));
+              s.withdrawConfig = Object.assign({}, defaultWithdrawConfig(), s.withdrawConfig || {}, { allowEmptyAccounts: false });
+              s.selectedWdAccountId = id;
+            });
+            showToast('Active withdrawal account changed');
+          } catch (err) { showToast(err.message, true); }
+          return;
+        }
+        const editBtn = e.target.closest('[data-acct-edit]');
+        if (editBtn && serverShared) {
+          const id = editBtn.dataset.acctEdit;
+          const acct = getEffectiveWithdrawAccounts(serverShared).find((a) => a.id === id);
+          if (!acct) return;
+          editingAcctId = id;
+          document.getElementById('inp-acct-type').value = acct.type || 'BankCard';
+          document.getElementById('inp-acct-label').value = acct.label || '';
+          document.getElementById('inp-acct-detail').value = acct.detail || '';
+          document.getElementById('inp-acct-ifsc').value = acct.ifsc || '';
+          document.getElementById('save-wd-acct-btn').textContent = 'Save Account Changes';
+          document.getElementById('cancel-wd-acct-btn').style.display = 'inline-flex';
+          return;
+        }
+        const delBtn = e.target.closest('[data-acct-del]');
+        if (delBtn) {
+          const id = delBtn.dataset.acctDel;
+          try {
+            await mutateAndSave('admin_del_wd_acct', (s) => {
+              const baseAccts = clone(getEffectiveWithdrawAccounts(s));
+              s.withdrawAccounts = baseAccts.filter((a) => a.id !== id);
+              if (s.selectedWdAccountId === id) {
+                s.selectedWdAccountId = s.withdrawAccounts[0] ? s.withdrawAccounts[0].id : '';
+              }
+              s.withdrawConfig = Object.assign({}, defaultWithdrawConfig(), s.withdrawConfig || {}, {
+                allowEmptyAccounts: s.withdrawAccounts.length === 0
+              });
+            });
+            if (editingAcctId === id) resetAcctForm();
+            showToast('Withdrawal account deleted');
+          } catch (err) { showToast(err.message, true); }
+        }
+      });
+
+      function resetWhForm() {
+        editingWhIndex = null;
+        document.getElementById('inp-wh-id').value = 'WD' + Date.now() + 'kHm';
+        document.getElementById('inp-wh-cash').value = '';
+        document.getElementById('inp-wh-method').value = 'BankCard';
+        document.getElementById('inp-wh-status').value = 'Processing';
+        document.getElementById('inp-wh-time').value = nowStr();
+        document.getElementById('inp-wh-days').value = '0';
+        document.getElementById('inp-wh-rtitle').value = '';
+        document.getElementById('inp-wh-rbody').value = '';
+        document.getElementById('save-wh-item-btn').textContent = 'Add Withdrawal Order';
+        document.getElementById('cancel-wh-item-btn').style.display = 'none';
+      }
+
+      document.getElementById('wh-gen-id-btn').addEventListener('click', () => {
+        document.getElementById('inp-wh-id').value = 'WD' + Date.now() + 'kHm';
+      });
+      document.getElementById('wh-now-btn').addEventListener('click', () => {
+        document.getElementById('inp-wh-time').value = nowStr();
+      });
+      document.getElementById('cancel-wh-item-btn').addEventListener('click', resetWhForm);
+      document.getElementById('save-wh-item-btn').addEventListener('click', async () => {
+        const id = (document.getElementById('inp-wh-id').value || '').trim() || ('WD' + Date.now());
+        const cash = Number(document.getElementById('inp-wh-cash').value || 0);
+        const method = document.getElementById('inp-wh-method').value || 'BankCard';
+        const status = document.getElementById('inp-wh-status').value || 'Processing';
+        const time = (document.getElementById('inp-wh-time').value || '').trim() || nowStr();
+        const daysAgo = Math.max(0, Number(document.getElementById('inp-wh-days').value || 0));
+        const remarkTitle = (document.getElementById('inp-wh-rtitle').value || '').trim();
+        const remarkBody = (document.getElementById('inp-wh-rbody').value || '').trim();
+        if (!cash || cash <= 0) { showToast('Enter withdrawal cash amount', true); return; }
+
+        const rec = { id, time, cash, method, status, daysAgo };
+        if (remarkTitle) rec.remarkTitle = remarkTitle;
+        if (remarkBody) rec.remarkBody = remarkBody;
+
+        try {
+          await mutateAndSave('admin_wh_item', (s) => {
+            s.withdrawalHistory = Array.isArray(s.withdrawalHistory) ? s.withdrawalHistory : [];
+            if (editingWhIndex !== null && s.withdrawalHistory[editingWhIndex]) {
+              s.withdrawalHistory[editingWhIndex] = rec;
+            } else {
+              s.withdrawalHistory.unshift(rec);
+            }
+          });
+          resetWhForm();
+          showToast('Withdrawal history updated');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      document.getElementById('wh-history-list').addEventListener('click', async (e) => {
+        const stBtn = e.target.closest('[data-wh-status]');
+        if (stBtn) {
+          const idx = Number(stBtn.dataset.idx);
+          const nextStatus = stBtn.dataset.whStatus;
+          try {
+            await mutateAndSave('admin_wh_status', (s) => {
+              const target = s.withdrawalHistory && s.withdrawalHistory[idx];
+              if (target) {
+                target.status = nextStatus;
+                if (nextStatus === 'Rejected' && !target.remarkTitle && !target.remarkBody) {
+                  target.remarkTitle = '【Withdrawal Cancelled Successfully】';
+                  target.remarkBody = 'Your withdrawal request has been successfully canceled as per your request. Thank you!';
+                }
+              }
+            });
+            showToast('Order status set to ' + nextStatus);
+          } catch (err) { showToast(err.message, true); }
+          return;
+        }
+        const editBtn = e.target.closest('[data-wh-edit]');
+        if (editBtn && serverShared) {
+          const idx = Number(editBtn.dataset.whEdit);
+          const item = (serverShared.withdrawalHistory || [])[idx];
+          if (!item) return;
+          editingWhIndex = idx;
+          document.getElementById('inp-wh-id').value = item.id || '';
+          document.getElementById('inp-wh-cash').value = item.cash ?? '';
+          document.getElementById('inp-wh-method').value = item.method || 'BankCard';
+          document.getElementById('inp-wh-status').value = item.status || 'Processing';
+          document.getElementById('inp-wh-time').value = item.time || nowStr();
+          document.getElementById('inp-wh-days').value = item.daysAgo ?? 0;
+          document.getElementById('inp-wh-rtitle').value = item.remarkTitle || '';
+          document.getElementById('inp-wh-rbody').value = item.remarkBody || '';
+          document.getElementById('save-wh-item-btn').textContent = 'Save Order Changes';
+          document.getElementById('cancel-wh-item-btn').style.display = 'inline-flex';
+          return;
+        }
+        const delBtn = e.target.closest('[data-wh-del]');
+        if (delBtn) {
+          const idx = Number(delBtn.dataset.whDel);
+          try {
+            await mutateAndSave('admin_wh_del', (s) => {
+              if (Array.isArray(s.withdrawalHistory)) s.withdrawalHistory.splice(idx, 1);
+            });
+            if (editingWhIndex === idx) resetWhForm();
+            showToast('Withdrawal record deleted');
+          } catch (err) { showToast(err.message, true); }
+        }
+      });
+
+      // 5. Balance Record Actions
+      function resetRecForm() {
+        editingRecIndex = null;
+        document.getElementById('inp-rec-type').value = '';
+        document.getElementById('inp-rec-cat').value = 'Income';
+        document.getElementById('inp-rec-change').value = '';
+        document.getElementById('inp-rec-bal').value = '';
+        document.getElementById('inp-rec-time').value = nowStr();
+        document.getElementById('inp-rec-note').value = '';
+        document.getElementById('rec-form-heading').textContent = 'Add Balance Record (#/records Details)';
+        document.getElementById('save-rec-btn').textContent = 'Add Balance Record';
+        document.getElementById('cancel-rec-btn').style.display = 'none';
+      }
+
+      document.getElementById('rec-now-btn').addEventListener('click', () => {
+        document.getElementById('inp-rec-time').value = nowStr();
+      });
+      document.getElementById('rec-fill-bal-btn').addEventListener('click', () => {
+        const bal = Number((serverShared && serverShared.user && serverShared.user.balance) || 0);
+        document.getElementById('inp-rec-bal').value = bal.toFixed(2);
+      });
+      document.getElementById('cancel-rec-btn').addEventListener('click', resetRecForm);
+      document.getElementById('save-rec-btn').addEventListener('click', async () => {
+        const type = (document.getElementById('inp-rec-type').value || '').trim();
+        const category = document.getElementById('inp-rec-cat').value || 'Income';
+        const change = formatSignedChange(document.getElementById('inp-rec-change').value, category);
+        const rawBal = (document.getElementById('inp-rec-bal').value || '').trim();
+        const currentBal = Number((serverShared && serverShared.user && serverShared.user.balance) || 0).toFixed(2);
+        const balance = rawBal || currentBal;
+        const time = (document.getElementById('inp-rec-time').value || '').trim() || nowStr();
+        const note = (document.getElementById('inp-rec-note').value || '').trim();
+
+        if (!type) { showToast('Enter record type', true); return; }
+
+        const rec = { type, category, time, change, balance, isIncome: category === 'Income' };
+        if (note) rec.note = note;
+
+        try {
+          await mutateAndSave('admin_balance_record', (s) => {
+            s.balanceRecords = Array.isArray(s.balanceRecords) ? s.balanceRecords : [];
+            if (editingRecIndex !== null && s.balanceRecords[editingRecIndex]) {
+              s.balanceRecords[editingRecIndex] = rec;
+            } else {
+              s.balanceRecords.unshift(rec);
+            }
+          });
+          resetRecForm();
+          showToast('Balance record saved');
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      document.querySelectorAll('[data-rec-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          recFilter = btn.dataset.recFilter;
+          document.querySelectorAll('[data-rec-filter]').forEach((b) => {
+            b.classList.toggle('active', b.dataset.recFilter === recFilter);
+          });
+          renderBalanceRecordsList();
+        });
+      });
+
+      document.getElementById('rec-search-inp').addEventListener('input', (e) => {
+        recSearch = e.target.value || '';
+        renderBalanceRecordsList();
+      });
+
+      document.getElementById('records-list').addEventListener('click', async (e) => {
+        const moveBtn = e.target.closest('[data-rec-move]');
+        if (moveBtn) {
+          const idx = Number(moveBtn.dataset.idx);
+          const dir = Number(moveBtn.dataset.recMove);
+          const nextIdx = idx + dir;
+          try {
+            await mutateAndSave('admin_reorder_record', (s) => {
+              const arr = s.balanceRecords || [];
+              if (nextIdx >= 0 && nextIdx < arr.length) {
+                const tmp = arr[idx];
+                arr[idx] = arr[nextIdx];
+                arr[nextIdx] = tmp;
+              }
+            });
+          } catch (err) { showToast(err.message, true); }
+          return;
+        }
+        const editBtn = e.target.closest('[data-rec-edit]');
+        if (editBtn && serverShared) {
+          const idx = Number(editBtn.dataset.recEdit);
+          const r = (serverShared.balanceRecords || [])[idx];
+          if (!r) return;
+          editingRecIndex = idx;
+          document.getElementById('inp-rec-type').value = r.type || '';
+          document.getElementById('inp-rec-cat').value = r.category || (r.isIncome ? 'Income' : 'Expense');
+          document.getElementById('inp-rec-change').value = r.change || '';
+          document.getElementById('inp-rec-bal').value = r.balance || '';
+          document.getElementById('inp-rec-time').value = r.time || nowStr();
+          document.getElementById('inp-rec-note').value = r.note || '';
+          document.getElementById('rec-form-heading').textContent = 'Edit Balance Record #' + (idx + 1);
+          document.getElementById('save-rec-btn').textContent = 'Save Record Changes';
+          document.getElementById('cancel-rec-btn').style.display = 'inline-flex';
+          document.getElementById('panel-records').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+        const delBtn = e.target.closest('[data-rec-del]');
+        if (delBtn) {
+          const idx = Number(delBtn.dataset.recDel);
+          try {
+            await mutateAndSave('admin_del_record', (s) => {
+              if (Array.isArray(s.balanceRecords)) s.balanceRecords.splice(idx, 1);
+            });
+            if (editingRecIndex === idx) resetRecForm();
+            showToast('Balance record deleted');
+          } catch (err) { showToast(err.message, true); }
+        }
+      });
+
+      // 6. Balance Actions
+      document.querySelectorAll('[data-bal-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.getElementById('inp-bal-delta').value = btn.dataset.balPreset;
+        });
+      });
+
+      document.getElementById('save-bal-exact-btn').addEventListener('click', async () => {
+        const nextBal = Math.max(0, Number(document.getElementById('inp-bal-exact').value));
+        if (!Number.isFinite(nextBal)) { showToast('Enter a valid balance', true); return; }
+        const shouldLog = document.getElementById('chk-bal-log-exact').checked;
+        const syncWd = document.getElementById('chk-bal-sync-wd-exact').checked;
+
+        try {
+          await mutateAndSave('admin_set_balance', (s) => {
+            s.user = s.user || {};
+            const prev = Number(s.user.balance || 0);
+            const rounded = +nextBal.toFixed(2);
+            const diff = +(rounded - prev).toFixed(2);
+            s.user.balance = rounded;
+            if (syncWd) s.user.withdrawable = rounded;
+            if (shouldLog && diff !== 0) {
+              const isInc = diff > 0;
+              s.balanceRecords = Array.isArray(s.balanceRecords) ? s.balanceRecords : [];
+              s.balanceRecords.unshift({
+                type: isInc ? 'Bonus Deposit' : 'Admin Adjust',
+                category: isInc ? 'Income' : 'Expense',
+                time: nowStr(),
+                change: (isInc ? '+' : '') + String(diff),
+                balance: rounded.toFixed(2),
+                isIncome: isInc
+              });
+            }
+          });
+          showToast('Cash Balance updated to ' + fmtMoney(nextBal));
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      async function adjustBalance(sign) {
+        const deltaRaw = Number(document.getElementById('inp-bal-delta').value || 0);
+        if (!Number.isFinite(deltaRaw) || deltaRaw <= 0) {
+          showToast('Enter positive amount to ' + (sign > 0 ? 'add' : 'subtract'), true);
+          return;
+        }
+        const delta = +(sign * deltaRaw).toFixed(2);
+        const recType = (document.getElementById('inp-bal-rec-type').value || '').trim() || (sign > 0 ? 'Bonus Deposit' : 'Admin Deduct');
+        const recNote = (document.getElementById('inp-bal-rec-note').value || '').trim();
+        const shouldLog = document.getElementById('chk-bal-log-delta').checked;
+        const syncWd = document.getElementById('chk-bal-sync-wd-delta').checked;
+
+        try {
+          let newBalOut = 0;
+          await mutateAndSave('admin_adjust_balance', (s) => {
+            s.user = s.user || {};
+            const cur = Number(s.user.balance || 0);
+            const next = +Math.max(0, cur + delta).toFixed(2);
+            s.user.balance = next;
+            newBalOut = next;
+            if (syncWd) {
+              const curWd = Number(s.user.withdrawable || 0);
+              s.user.withdrawable = +Math.max(0, curWd + delta).toFixed(2);
+            }
+            if (shouldLog) {
+              const isInc = delta > 0;
+              const entry = {
+                type: recType,
+                category: isInc ? 'Income' : 'Expense',
+                time: nowStr(),
+                change: (isInc ? '+' : '') + String(delta),
+                balance: next.toFixed(2),
+                isIncome: isInc
+              };
+              if (recNote) entry.note = recNote;
+              s.balanceRecords = Array.isArray(s.balanceRecords) ? s.balanceRecords : [];
+              s.balanceRecords.unshift(entry);
+            }
+          });
+          showToast(`Balance ${sign > 0 ? '+' : ''}${delta} → ${fmtMoney(newBalOut)}`);
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      }
+
+      document.getElementById('add-bal-delta-btn').addEventListener('click', () => adjustBalance(1));
+      document.getElementById('sub-bal-delta-btn').addEventListener('click', () => adjustBalance(-1));
+
+      function startPolling() {
+        if (sseSource) { try { sseSource.close(); } catch (_) {} sseSource = null; }
+        clearTimeout(sseReconnectTimer);
+        if (pollTimer) return;
+        setSyncStatus(syncLabel(), false);
+        pollTimer = setInterval(() => {
+          if (document.hidden) return;
+          fetchState({ deltaCheck: true })
+            .then((data) => {
+              if (data && !data.unchanged && data.shared) {
+                syncAllPanels(true);
+              }
+            })
+            .catch(() => {});
+        }, pollIntervalMs);
+      }
+
+      function connectSSE() {
+        if (syncMode === 'poll' || typeof EventSource !== 'function') {
+          startPolling();
+          return;
+        }
+        try {
+          if (sseSource) sseSource.close();
+          const base = apiBase || '';
+          sseSource = new EventSource(base + '/api/events');
+          sseSource.addEventListener('state', (ev) => {
+            try {
+              const payload = JSON.parse(ev.data || 'null');
+              if (!payload || !payload.shared) return;
+              const v = Number(payload.version || 0);
+              if (v && v >= serverVersion) {
+                serverShared = payload.shared;
+                serverVersion = v;
+                setSyncStatus(syncLabel(), false);
+                syncAllPanels(payload.clientId !== ADMIN_CLIENT_ID);
+              }
+            } catch (_) {}
+          });
+          sseSource.onerror = () => {
+            setSyncStatus('Reconnecting...', true);
+            clearTimeout(sseReconnectTimer);
+            sseReconnectTimer = setTimeout(() => {
+              fetchState().then((data) => {
+                if (data && !data.unchanged) syncAllPanels(true);
+                if (syncMode === 'poll') startPolling();
+                else connectSSE();
+              }).catch(() => {});
+            }, 3000);
+          };
+        } catch (_) {
+          syncMode = 'poll';
+          startPolling();
+        }
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && apiBase !== null) {
+          fetchState({ deltaCheck: true }).then((d) => {
+            if (d && !d.unchanged && d.shared) syncAllPanels(true);
+          }).catch(() => {});
+        }
+      });
+
+      // Boot
+      fetchState()
+        .then(() => {
+          syncAllPanels(true);
+          if (syncMode === 'poll') startPolling();
+          else connectSSE();
+        })
+        .catch((err) => {
+          setSyncStatus('Offline / Error', true);
+          showToast('Failed to load /api/state: ' + err.message, true);
+        });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+node_modules/
+db/*.db*
+db/shared-state.json
+extracted_raw/
+.netlify/
+dist/
