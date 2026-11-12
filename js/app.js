@@ -2672,39 +2672,65 @@
         return;
       }
       if (action === 'open-inv-date') {
-        const reportKey = getReportDateKey();
-        const isAvailable = (ds) => ds >= PLATFORM_LAUNCH_KEY && ds <= reportKey;
-        state.tempInvDate = (state.invDate && isAvailable(state.invDate)) ? state.invDate : reportKey;
-        const octDays = [25, 26, 27, 28, 29, 30, 31];
-        const novDays = Array.from({ length: 30 }, (_, i) => i + 1);
+        const reportDate = getReportBaseDate();
+        const reportKey = getLocalDateKey(reportDate);
+        state.tempInvDate = (state.invDate && state.invDate <= reportKey) ? state.invDate : reportKey;
+
+        const pad2 = (v) => String(v).padStart(2, '0');
+        const fmtMonthTitle = (y, m) => `${y}/${pad2(m + 1)}`;
+        const curY = reportDate.getFullYear();
+        const curM = reportDate.getMonth();
+        const daysInCurMonth = new Date(curY, curM + 1, 0).getDate();
+        const firstWeekday = new Date(curY, curM, 1).getDay();
+
+        // Build top visible rows from previous month starting from the Sunday 2-3 weeks prior
+        const prevMonthDate = new Date(curY, curM - 1, 1);
+        const prevY = prevMonthDate.getFullYear();
+        const prevM = prevMonthDate.getMonth();
+        const daysInPrevMonth = new Date(curY, curM, 0).getDate();
+        const prevStartDay = Math.max(1, daysInPrevMonth - 6);
+        const prevFirstWeekday = new Date(prevY, prevM, prevStartDay).getDay();
+
+        const renderDayBtn = (y, m, d) => {
+          const ds = `${y}-${pad2(m + 1)}-${pad2(d)}`;
+          const disabled = ds > reportKey;
+          const selected = state.tempInvDate === ds;
+          return `<button class="cal-day ${selected ? 'selected' : ''} ${disabled ? 'is-disabled' : ''}" data-action="pick-cal-date" data-date="${ds}">${d}</button>`;
+        };
+
+        const prevCells = [
+          ...Array.from({ length: prevFirstWeekday }, () => '<div class="cal-day-empty"></div>'),
+          ...Array.from({ length: daysInPrevMonth - prevStartDay + 1 }, (_, i) => renderDayBtn(prevY, prevM, prevStartDay + i))
+        ].join('');
+
+        const curCells = [
+          ...Array.from({ length: firstWeekday }, () => '<div class="cal-day-empty"></div>'),
+          ...Array.from({ length: daysInCurMonth }, (_, i) => renderDayBtn(curY, curM, i + 1))
+        ].join('');
+
+        const closeSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
         openDialog(`<div class="cal-sheet">
-          <div class="cal-head">Calendar<button class="cal-close" data-action="close-modal">✕</button></div>
-          <div class="cal-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
-          <div class="cal-month-title">2026/10</div>
-          <div class="cal-grid">
-            ${octDays.map(d => {
-              const ds = `2026-10-${String(d).padStart(2, '0')}`;
-              return `<button class="cal-day ${state.tempInvDate === ds ? 'selected' : ''} ${!isAvailable(ds) ? 'is-unavailable' : ''}" data-action="pick-cal-date" data-date="${ds}">${d}</button>`;
-            }).join('')}
+          <div class="cal-header">
+            <div class="cal-head">Calendar<button class="cal-close" data-action="close-modal" aria-label="Close">${closeSvg}</button></div>
+            <div class="cal-header-subtitle">${fmtMonthTitle(prevY, prevM)}</div>
+            <div class="cal-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
           </div>
-          <div class="cal-month-title">2026/11</div>
-          <div class="cal-month-wrap">
-            <div class="cal-watermark">11</div>
-            <div class="cal-grid">
-              ${novDays.map(d => {
-                const ds = `2026-11-${String(d).padStart(2, '0')}`;
-                return `<button class="cal-day ${state.tempInvDate === ds ? 'selected' : ''} ${!isAvailable(ds) ? 'is-unavailable' : ''}" data-action="pick-cal-date" data-date="${ds}">${d}</button>`;
-              }).join('')}
+          <div class="cal-body">
+            <div class="cal-grid">${prevCells}</div>
+            <div class="cal-month-title">${fmtMonthTitle(curY, curM)}</div>
+            <div class="cal-month-wrap">
+              <div class="cal-watermark">${curM + 1}</div>
+              <div class="cal-grid">${curCells}</div>
             </div>
           </div>
-          <div class="cal-actions-row">
-            <button class="cal-all-btn" data-action="clear-cal-date">All Days</button>
-            <button class="btn-primary-full" style="height:0.96rem;margin-top:0;" data-action="confirm-cal-date">Confirm</button>
+          <div class="cal-footer">
+            <button class="cal-confirm-btn" data-action="confirm-cal-date">Confirm</button>
           </div>
         </div>`, false);
         return;
       }
       if (action === 'pick-cal-date') {
+        if (actEl.classList.contains('is-disabled')) return;
         state.tempInvDate = actEl.dataset.date;
         document.querySelectorAll('.cal-day').forEach(b => b.classList.toggle('selected', b.dataset.date === state.tempInvDate));
         return;
