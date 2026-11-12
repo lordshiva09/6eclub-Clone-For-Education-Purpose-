@@ -6,12 +6,17 @@
   "main": "server.js",
   "scripts": {
     "build": "node --no-warnings scripts/build-netlify.js",
-    "start": "node --no-warnings server.js"
+    "start": "node --no-warnings server.js",
+    "dev:cf": "npm run build && wrangler dev --port 8787",
+    "deploy:cf": "npm run build && wrangler deploy"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
     "@netlify/blobs": "^11.1.9"
+  },
+  "devDependencies": {
+    "wrangler": "^4.160.1"
   }
 }

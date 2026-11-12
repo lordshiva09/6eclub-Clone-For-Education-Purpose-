@@ -903,6 +903,9 @@
       let depositDraftDirty = false;
       let toastTimer = null;
       let sseSource = null;
+      let wsConn = null;
+      let wsPath = '/api/ws';
+      let wsReconnectTimer = null;
       let syncMode = 'sse';
       let pollIntervalMs = 1500;
       let pollTimer = null;
@@ -1034,7 +1037,11 @@
               if (!data || !data.ok) throw new Error('Invalid state response');
               apiBase = base;
               syncOpenAppHref();
-              if (data.syncMode === 'poll' || data.sse === false) {
+              if (data.syncMode === 'ws') {
+                syncMode = 'ws';
+                if (data.wsPath) wsPath = data.wsPath;
+                if (data.pollIntervalMs) pollIntervalMs = Math.max(2000, Number(data.pollIntervalMs));
+              } else if (data.syncMode === 'poll' || data.sse === false) {
                 syncMode = 'poll';
                 if (data.pollIntervalMs) pollIntervalMs = Math.max(1000, Number(data.pollIntervalMs));
               }
@@ -1080,7 +1087,10 @@
             if (!res.ok || !data || !data.ok) {
               throw new Error((data && data.error) || 'Failed to save state');
             }
-            if (data.syncMode === 'poll' || data.sse === false) {
+            if (data.syncMode === 'ws') {
+              syncMode = 'ws';
+              if (data.wsPath) wsPath = data.wsPath;
+            } else if (data.syncMode === 'poll' || data.sse === false) {
               syncMode = 'poll';
             }
             serverShared = data.shared;
@@ -2003,9 +2013,65 @@
       document.getElementById('add-bal-delta-btn').addEventListener('click', () => adjustBalance(1));
       document.getElementById('sub-bal-delta-btn').addEventListener('click', () => adjustBalance(-1));
 
+      function connectWS() {
+        if (typeof WebSocket !== 'function') {
+          syncMode = 'poll';
+          startPolling();
+          return;
+        }
+        if (sseSource) { try { sseSource.close(); } catch (_) {} sseSource = null; }
+        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        clearTimeout(wsReconnectTimer);
+        try {
+          if (wsConn && (wsConn.readyState === WebSocket.OPEN || wsConn.readyState === WebSocket.CONNECTING)) return;
+          const wsBase = apiBase
+            ? apiBase.replace(/^http/i, 'ws')
+            : ((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host);
+          wsConn = new WebSocket(wsBase + wsPath);
+          wsConn.addEventListener('open', () => {
+            setSyncStatus(syncLabel(), false);
+          });
+          wsConn.addEventListener('message', (ev) => {
+            try {
+              if (!ev.data || ev.data === 'pong') return;
+              const payload = JSON.parse(ev.data);
+              if (!payload || !payload.shared) return;
+              const v = Number(payload.version || 0);
+              if (v && v >= serverVersion) {
+                serverShared = payload.shared;
+                serverVersion = v;
+                setSyncStatus(syncLabel(), false);
+                syncAllPanels(payload.clientId !== ADMIN_CLIENT_ID);
+              }
+            } catch (_) {}
+          });
+          wsConn.addEventListener('close', () => {
+            wsConn = null;
+            setSyncStatus('Reconnecting...', true);
+            clearTimeout(wsReconnectTimer);
+            wsReconnectTimer = setTimeout(() => {
+              fetchState().then((d) => {
+                if (d && !d.unchanged && d.shared) syncAllPanels(true);
+                startLiveSync();
+              }).catch(() => {
+                startLiveSync();
+              });
+            }, 2500);
+          });
+          wsConn.addEventListener('error', () => {
+            try { if (wsConn) wsConn.close(); } catch (_) {}
+          });
+        } catch (_) {
+          syncMode = 'poll';
+          startPolling();
+        }
+      }
+
       function startPolling() {
         if (sseSource) { try { sseSource.close(); } catch (_) {} sseSource = null; }
+        if (wsConn) { try { wsConn.close(); } catch (_) {} wsConn = null; }
         clearTimeout(sseReconnectTimer);
+        clearTimeout(wsReconnectTimer);
         if (pollTimer) return;
         setSyncStatus(syncLabel(), false);
         pollTimer = setInterval(() => {
@@ -2021,6 +2087,7 @@
       }
 
       function connectSSE() {
+        if (syncMode === 'ws') { connectWS(); return; }
         if (syncMode === 'poll' || typeof EventSource !== 'function') {
           startPolling();
           return;
@@ -2048,8 +2115,7 @@
             sseReconnectTimer = setTimeout(() => {
               fetchState().then((data) => {
                 if (data && !data.unchanged) syncAllPanels(true);
-                if (syncMode === 'poll') startPolling();
-                else connectSSE();
+                startLiveSync();
               }).catch(() => {});
             }, 3000);
           };
@@ -2057,6 +2123,12 @@
           syncMode = 'poll';
           startPolling();
         }
+      }
+
+      function startLiveSync() {
+        if (syncMode === 'ws') connectWS();
+        else if (syncMode === 'poll') startPolling();
+        else connectSSE();
       }
 
       document.addEventListener('visibilitychange', () => {
@@ -2071,8 +2143,7 @@
       fetchState()
         .then(() => {
           syncAllPanels(true);
-          if (syncMode === 'poll') startPolling();
-          else connectSSE();
+          startLiveSync();
         })
         .catch((err) => {
           setSyncStatus('Offline / Error', true);

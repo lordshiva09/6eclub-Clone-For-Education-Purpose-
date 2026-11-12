@@ -189,6 +189,9 @@
   let queuedSyncOpts = null;
   let pendingRemoteRender = false;
   let sseSource = null;
+  let wsConn = null;
+  let wsPath = '/api/ws';
+  let wsReconnectTimer = null;
   let syncMode = 'sse';
   let pollIntervalMs = 1500;
   let pollTimer = null;
@@ -299,7 +302,11 @@
       }
       if (!res.ok) return null;
       const data = await res.json();
-      if (data && (data.syncMode === 'poll' || data.sse === false)) {
+      if (data && data.syncMode === 'ws') {
+        syncMode = 'ws';
+        if (data.wsPath) wsPath = data.wsPath;
+        if (data.pollIntervalMs) pollIntervalMs = Math.max(2000, Number(data.pollIntervalMs));
+      } else if (data && (data.syncMode === 'poll' || data.sse === false)) {
         syncMode = 'poll';
         if (data.pollIntervalMs) pollIntervalMs = Math.max(1000, Number(data.pollIntervalMs));
       }
@@ -317,6 +324,46 @@
 
   function startAdaptiveSyncLoop() {
     if (!syncEnabled) return;
+    if (syncMode === 'ws' && typeof WebSocket === 'function') {
+      if (sseSource) { try { sseSource.close(); } catch (_) {} sseSource = null; }
+      if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      clearTimeout(wsReconnectTimer);
+      try {
+        if (wsConn && (wsConn.readyState === WebSocket.OPEN || wsConn.readyState === WebSocket.CONNECTING)) return;
+        const wsProto = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        wsConn = new WebSocket(wsProto + window.location.host + wsPath);
+        wsConn.addEventListener('message', (ev) => {
+          try {
+            if (!ev.data || ev.data === 'pong') return;
+            const payload = JSON.parse(ev.data);
+            if (payload && payload.shared) {
+              applyRemoteState(payload.shared, {
+                version: payload.version,
+                clientId: payload.clientId,
+                renderNow: true
+              });
+            }
+          } catch (_) {}
+        });
+        wsConn.addEventListener('close', () => {
+          wsConn = null;
+          clearTimeout(wsReconnectTimer);
+          wsReconnectTimer = setTimeout(() => {
+            if (!syncEnabled || syncMode !== 'ws') return;
+            fetchStateFromServer({ deltaCheck: serverVersion > 0 });
+            startAdaptiveSyncLoop();
+          }, 2500);
+        });
+        wsConn.addEventListener('error', () => {
+          try { if (wsConn) wsConn.close(); } catch (_) {}
+        });
+      } catch (_) {
+        syncMode = 'poll';
+        pollIntervalMs = 2000;
+        startAdaptiveSyncLoop();
+      }
+      return;
+    }
     if (syncMode === 'poll' || typeof EventSource !== 'function') {
       if (sseSource) { try { sseSource.close(); } catch (_) {} sseSource = null; }
       if (!pollTimer) {
@@ -343,9 +390,9 @@
         } catch (_) {}
       });
       sseSource.onerror = () => {
-        // Fallback smoothly to lightweight polling if SSE stream fails (e.g. serverless proxy)
+        // Fallback smoothly to WS or lightweight polling if SSE stream fails (e.g. serverless edge)
         fetchStateFromServer().then((d) => {
-          if (d && syncMode === 'poll') startAdaptiveSyncLoop();
+          if (d && (syncMode === 'ws' || syncMode === 'poll')) startAdaptiveSyncLoop();
         });
       };
     } catch (_) {

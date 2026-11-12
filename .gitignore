@@ -3,4 +3,5 @@ db/*.db*
 db/shared-state.json
 extracted_raw/
 .netlify/
+.wrangler/
 dist/
